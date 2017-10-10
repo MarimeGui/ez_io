@@ -68,7 +68,7 @@ pub trait ReadE: Read {
         }
     }
 
-    fn read_to_string(&mut self, length: u8) -> String {
+    fn read_to_string_n(&mut self, length: u8) -> String {
         let mut bytes = vec![0; length as usize];
         self.read_exact(&mut bytes).expect("Failed to read");
         String::from_utf8(bytes).unwrap()
@@ -93,6 +93,6 @@ mod tests {
     #[test]
     fn string_tests() {
         let text_bytes = [72, 101, 108, 108, 111];
-        assert_eq!(String::from("Hello"), Cursor::new(text_bytes).read_to_string(5));
+        assert_eq!(String::from("Hello"), Cursor::new(text_bytes).read_to_string_n(5));
     }
 }
