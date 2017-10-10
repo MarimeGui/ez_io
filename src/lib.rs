@@ -71,7 +71,7 @@ pub trait ReadE: Read {
     fn read_to_string_n(&mut self, length: u8) -> String {
         let mut bytes = vec![0; length as usize];
         self.read_exact(&mut bytes).expect("Failed to read");
-        String::from_utf8(bytes).unwrap()
+        String::from_utf8(bytes).expect("Not convertible to UTF-8")
     }
 }
 
