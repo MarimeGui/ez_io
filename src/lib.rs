@@ -71,7 +71,7 @@ pub trait ReadE: Read {
         }
     }
 
-    fn read_to_string_n(&mut self, length: u8) -> Result<String, Box<Error>> {
+    fn read_to_string_n(&mut self, length: u32) -> Result<String, Box<Error>> {
         let mut bytes = vec![0; length as usize];
         self.read_exact(&mut bytes)?;
         let out = String::from_utf8(bytes);
