@@ -51,7 +51,7 @@ pub trait ReadE: Read {
         }
     }
 
-    fn read_to_i8(&mut self) -> EResult<u8> {
+    fn read_to_i8(&mut self) -> EResult<i8> {
         let mut temp: [u8; 1] = [0];
         self.read_exact(&mut temp[..])?;
         unsafe {
@@ -59,7 +59,7 @@ pub trait ReadE: Read {
         }
     }
 
-    fn read_le_to_i16(&mut self) -> EResult<u16> {
+    fn read_le_to_i16(&mut self) -> EResult<i16> {
         let mut temp: [u8; 2] = [0; 2];
         self.read_exact(&mut temp[..])?;
         #[cfg(target_endian = "big")]
@@ -69,7 +69,7 @@ pub trait ReadE: Read {
         }
     }
 
-    fn read_be_to_i16(&mut self) -> EResult<u16> {
+    fn read_be_to_i16(&mut self) -> EResult<i16> {
         let mut temp: [u8; 2] = [0; 2];
         self.read_exact(&mut temp[..])?;
         #[cfg(target_endian = "little")]
