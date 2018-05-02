@@ -1,9 +1,9 @@
-use std::io::Read;
-use std::io::Write;
-use std::result::Result;
-use std::io::Result as EResult;
 use std::error::Error;
+use std::io::Read;
+use std::io::Result as EResult;
+use std::io::Write;
 use std::mem::transmute;
+use std::result::Result;
 
 pub trait ReadE: Read {
     // u8
@@ -19,9 +19,7 @@ pub trait ReadE: Read {
         self.read_exact(&mut temp[..])?;
         #[cfg(target_endian = "big")]
         temp.reverse();
-        unsafe {
-            Ok(transmute::<[u8; 2], u16>(temp))
-        }
+        unsafe { Ok(transmute::<[u8; 2], u16>(temp)) }
     }
 
     fn read_be_to_u16(&mut self) -> EResult<u16> {
@@ -29,9 +27,7 @@ pub trait ReadE: Read {
         self.read_exact(&mut temp[..])?;
         #[cfg(target_endian = "little")]
         temp.reverse();
-        unsafe {
-            Ok(transmute::<[u8; 2], u16>(temp))
-        }
+        unsafe { Ok(transmute::<[u8; 2], u16>(temp)) }
     }
 
     // u32
@@ -40,9 +36,7 @@ pub trait ReadE: Read {
         self.read_exact(&mut temp[..])?;
         #[cfg(target_endian = "big")]
         temp.reverse();
-        unsafe {
-            Ok(transmute::<[u8; 4], u32>(temp))
-        }
+        unsafe { Ok(transmute::<[u8; 4], u32>(temp)) }
     }
 
     fn read_be_to_u32(&mut self) -> EResult<u32> {
@@ -50,18 +44,14 @@ pub trait ReadE: Read {
         self.read_exact(&mut temp[..])?;
         #[cfg(target_endian = "little")]
         temp.reverse();
-        unsafe {
-            Ok(transmute::<[u8; 4], u32>(temp))
-        }
+        unsafe { Ok(transmute::<[u8; 4], u32>(temp)) }
     }
 
     // i8
     fn read_to_i8(&mut self) -> EResult<i8> {
         let mut temp: [u8; 1] = [0];
         self.read_exact(&mut temp[..])?;
-        unsafe {
-            Ok(transmute::<u8, i8>(temp[0]))
-        }
+        unsafe { Ok(transmute::<u8, i8>(temp[0])) }
     }
 
     // i16
@@ -70,9 +60,7 @@ pub trait ReadE: Read {
         self.read_exact(&mut temp[..])?;
         #[cfg(target_endian = "big")]
         temp.reverse();
-        unsafe {
-            Ok(transmute::<[u8; 2], i16>(temp))
-        }
+        unsafe { Ok(transmute::<[u8; 2], i16>(temp)) }
     }
 
     fn read_be_to_i16(&mut self) -> EResult<i16> {
@@ -80,9 +68,7 @@ pub trait ReadE: Read {
         self.read_exact(&mut temp[..])?;
         #[cfg(target_endian = "little")]
         temp.reverse();
-        unsafe {
-            Ok(transmute::<[u8; 2], i16>(temp))
-        }
+        unsafe { Ok(transmute::<[u8; 2], i16>(temp)) }
     }
 
     // i32
@@ -91,9 +77,7 @@ pub trait ReadE: Read {
         self.read_exact(&mut temp[..])?;
         #[cfg(target_endian = "big")]
         temp.reverse();
-        unsafe {
-            Ok(transmute::<[u8; 4], i32>(temp))
-        }
+        unsafe { Ok(transmute::<[u8; 4], i32>(temp)) }
     }
 
     fn read_be_to_i32(&mut self) -> EResult<i32> {
@@ -101,9 +85,7 @@ pub trait ReadE: Read {
         self.read_exact(&mut temp[..])?;
         #[cfg(target_endian = "little")]
         temp.reverse();
-        unsafe {
-            Ok(transmute::<[u8; 4], i32>(temp))
-        }
+        unsafe { Ok(transmute::<[u8; 4], i32>(temp)) }
     }
 
     // f32
@@ -112,9 +94,7 @@ pub trait ReadE: Read {
         self.read_exact(&mut temp[..])?;
         #[cfg(target_endian = "big")]
         temp.reverse();
-        unsafe {
-            Ok(transmute::<[u8; 4], f32>(temp))
-        }
+        unsafe { Ok(transmute::<[u8; 4], f32>(temp)) }
     }
 
     fn read_be_to_f32(&mut self) -> EResult<f32> {
@@ -122,9 +102,24 @@ pub trait ReadE: Read {
         self.read_exact(&mut temp[..])?;
         #[cfg(target_endian = "little")]
         temp.reverse();
-        unsafe {
-            Ok(transmute::<[u8; 4], f32>(temp))
-        }
+        unsafe { Ok(transmute::<[u8; 4], f32>(temp)) }
+    }
+
+    // f64
+    fn read_le_to_f64(&mut self) -> EResult<f64> {
+        let mut temp: [u8; 8] = [0; 8];
+        self.read_exact(&mut temp[..])?;
+        #[cfg(target_endian = "big")]
+        temp.reverse();
+        unsafe { Ok(transmute::<[u8; 8], f64>(temp)) }
+    }
+
+    fn read_be_to_f64(&mut self) -> EResult<f64> {
+        let mut temp: [u8; 8] = [0; 8];
+        self.read_exact(&mut temp[..])?;
+        #[cfg(target_endian = "little")]
+        temp.reverse();
+        unsafe { Ok(transmute::<[u8; 8], f64>(temp)) }
     }
 
     fn read_to_string_n(&mut self, length: u32) -> Result<String, Box<Error>> {
@@ -150,93 +145,109 @@ pub trait WriteE: Write {
 
     // u16
     fn write_le_to_u16(&mut self, tw: u16) -> EResult<()> {
-        let mut temp = unsafe {
-            transmute::<u16, [u8; 2]>(tw)
-        };
+        let mut temp = unsafe { transmute::<u16, [u8; 2]>(tw) };
         #[cfg(target_endian = "big")]
-            temp.reverse();
+        temp.reverse();
         self.write_all(&temp)?;
         Ok(())
     }
 
     fn write_be_to_u16(&mut self, tw: u16) -> EResult<()> {
-        let mut temp = unsafe {
-            transmute::<u16, [u8; 2]>(tw)
-        };
+        let mut temp = unsafe { transmute::<u16, [u8; 2]>(tw) };
         #[cfg(target_endian = "little")]
-            temp.reverse();
+        temp.reverse();
         self.write_all(&temp)?;
         Ok(())
     }
 
     // u32
     fn write_le_to_u32(&mut self, tw: u32) -> EResult<()> {
-        let mut temp = unsafe {
-            transmute::<u32, [u8; 4]>(tw)
-        };
+        let mut temp = unsafe { transmute::<u32, [u8; 4]>(tw) };
         #[cfg(target_endian = "big")]
-            temp.reverse();
+        temp.reverse();
         self.write_all(&temp)?;
         Ok(())
     }
 
     fn write_be_to_u32(&mut self, tw: u32) -> EResult<()> {
-        let mut temp = unsafe {
-            transmute::<u32, [u8; 4]>(tw)
-        };
+        let mut temp = unsafe { transmute::<u32, [u8; 4]>(tw) };
         #[cfg(target_endian = "little")]
-            temp.reverse();
+        temp.reverse();
         self.write_all(&temp)?;
         Ok(())
     }
 
     // i8
     fn write_to_i8(&mut self, tw: i8) -> EResult<()> {
-        let mut temp = unsafe {
-            transmute::<i8, [u8; 1]>(tw)
-        };
+        let mut temp = unsafe { transmute::<i8, [u8; 1]>(tw) };
         self.write_all(&temp)?;
         Ok(())
     }
 
     // i16
     fn write_le_to_i16(&mut self, tw: i16) -> EResult<()> {
-        let mut temp = unsafe {
-            transmute::<i16, [u8; 2]>(tw)
-        };
+        let mut temp = unsafe { transmute::<i16, [u8; 2]>(tw) };
         #[cfg(target_endian = "big")]
-            temp.reverse();
+        temp.reverse();
         self.write_all(&temp)?;
         Ok(())
     }
 
     fn write_be_to_i16(&mut self, tw: i16) -> EResult<()> {
-        let mut temp = unsafe {
-            transmute::<i16, [u8; 2]>(tw)
-        };
+        let mut temp = unsafe { transmute::<i16, [u8; 2]>(tw) };
         #[cfg(target_endian = "little")]
-            temp.reverse();
+        temp.reverse();
         self.write_all(&temp)?;
         Ok(())
     }
 
     // i32
     fn write_le_to_i32(&mut self, tw: i32) -> EResult<()> {
-        let mut temp = unsafe {
-            transmute::<i32, [u8; 4]>(tw)
-        };
+        let mut temp = unsafe { transmute::<i32, [u8; 4]>(tw) };
         #[cfg(target_endian = "big")]
-            temp.reverse();
+        temp.reverse();
+        self.write_all(&temp)?;
+        Ok(())
+    }
+
+    // f32
+    fn write_le_to_f32(&mut self, tw: f32) -> EResult<()> {
+        let mut temp = unsafe { transmute::<f32, [u8; 4]>(tw) };
+        #[cfg(target_endian = "big")]
+        temp.reverse();
+        self.write_all(&temp)?;
+        Ok(())
+    }
+
+    fn write_be_to_f32(&mut self, tw: f32) -> EResult<()> {
+        let mut temp = unsafe { transmute::<f32, [u8; 4]>(tw) };
+        #[cfg(target_endian = "little")]
+        temp.reverse();
+        self.write_all(&temp)?;
+        Ok(())
+    }
+
+    // f64
+    fn write_le_to_f64(&mut self, tw: f64) -> EResult<()> {
+        let mut temp = unsafe { transmute::<f64, [u8; 8]>(tw) };
+        #[cfg(target_endian = "big")]
+        temp.reverse();
+        self.write_all(&temp)?;
+        Ok(())
+    }
+
+    fn write_be_to_f64(&mut self, tw: f64) -> EResult<()> {
+        let mut temp = unsafe { transmute::<f64, [u8; 8]>(tw) };
+        #[cfg(target_endian = "little")]
+        temp.reverse();
         self.write_all(&temp)?;
         Ok(())
     }
 
     fn write_be_to_i32(&mut self, tw: i32) -> EResult<()> {
-        let mut temp = unsafe {
-            transmute::<i32, [u8; 4]>(tw)
-        };
+        let mut temp = unsafe { transmute::<i32, [u8; 4]>(tw) };
         #[cfg(target_endian = "little")]
-            temp.reverse();
+        temp.reverse();
         self.write_all(&temp)?;
         Ok(())
     }
@@ -246,8 +257,8 @@ impl<W: Write + ?Sized> WriteE for W {}
 
 #[cfg(test)]
 mod read_tests {
-    use std::io::Cursor;
     use super::ReadE;
+    use std::io::Cursor;
 
     #[test]
     fn u8_tests() {
@@ -260,19 +271,28 @@ mod read_tests {
     }
     #[test]
     fn u32_tests() {
-        assert_eq!(987654321u32, Cursor::new([177, 104, 222, 58]).read_le_to_u32().unwrap());
-        assert_eq!(987654321u32, Cursor::new([58, 222, 104, 177]).read_be_to_u32().unwrap());
+        assert_eq!(
+            987654321u32,
+            Cursor::new([177, 104, 222, 58]).read_le_to_u32().unwrap()
+        );
+        assert_eq!(
+            987654321u32,
+            Cursor::new([58, 222, 104, 177]).read_be_to_u32().unwrap()
+        );
     }
     #[test]
     fn string_tests() {
         let text_bytes = [72, 101, 108, 108, 111];
-        assert_eq!(String::from("Hello"), Cursor::new(text_bytes).read_to_string_n(5).unwrap());
+        assert_eq!(
+            String::from("Hello"),
+            Cursor::new(text_bytes).read_to_string_n(5).unwrap()
+        );
     }
 }
 #[cfg(test)]
 mod write_tests {
-    use std::io::Cursor;
     use super::WriteE;
+    use std::io::Cursor;
 
     #[test]
     fn u8_tests() {
