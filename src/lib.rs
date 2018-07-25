@@ -1,3 +1,6 @@
+pub mod error;
+
+use error::{MagicNumberCheckError, WrongMagicNumber};
 use std::error::Error;
 use std::io::Read;
 use std::io::Result;
@@ -278,6 +281,23 @@ pub trait WriteE: Write {
 
 impl<W: Write> WriteE for W {}
 
+pub trait MagicNumberCheck: Read {
+    fn check_magic_number(&mut self, magic_number: &[u8]) -> STDResult<(), MagicNumberCheckError> {
+        let mut read = vec![0u8; magic_number.len()];
+        self.read_exact(&mut read)?;
+        if read.as_slice() != magic_number {
+            Err(MagicNumberCheckError::MagicNumber(WrongMagicNumber {
+                expected: magic_number.to_vec(),
+                read: read.to_vec(),
+            }))
+        } else {
+            Ok(())
+        }
+    }
+}
+
+impl<R: Read> MagicNumberCheck for R {}
+
 #[cfg(test)]
 mod read_tests {
     use super::ReadE;
@@ -307,22 +327,30 @@ mod read_tests {
     fn f32_tests() {
         assert_eq!(
             768f32,
-            Cursor::new([0x00, 0x00, 0x40, 0x44]).read_le_to_f32().unwrap()
+            Cursor::new([0x00, 0x00, 0x40, 0x44])
+                .read_le_to_f32()
+                .unwrap()
         );
         assert_eq!(
             768f32,
-            Cursor::new([0x44, 0x40, 0x00, 0x00]).read_be_to_f32().unwrap()
+            Cursor::new([0x44, 0x40, 0x00, 0x00])
+                .read_be_to_f32()
+                .unwrap()
         );
     }
     #[test]
     fn f64_tests() {
         assert_eq!(
             91024.5f64,
-            Cursor::new([0x00, 0x00, 0x00, 0x00, 0x08, 0x39, 0xF6, 0x40]).read_le_to_f64().unwrap()
+            Cursor::new([0x00, 0x00, 0x00, 0x00, 0x08, 0x39, 0xF6, 0x40])
+                .read_le_to_f64()
+                .unwrap()
         );
         assert_eq!(
             91024.5f64,
-            Cursor::new([0x40, 0xF6, 0x39, 0x08, 0x00, 0x00, 0x00, 0x00]).read_be_to_f64().unwrap()
+            Cursor::new([0x40, 0xF6, 0x39, 0x08, 0x00, 0x00, 0x00, 0x00])
+                .read_be_to_f64()
+                .unwrap()
         );
     }
     #[test]
@@ -367,9 +395,38 @@ mod write_tests {
     fn f64_tests() {
         let mut test_cursor: Cursor<Vec<u8>> = Cursor::new(vec![0u8; 8]);
         test_cursor.write_le_to_f64(91024.5f64).unwrap();
-        assert_eq!(test_cursor.into_inner(), vec![0x00, 0x00, 0x00, 0x00, 0x08, 0x39, 0xF6, 0x40]);
+        assert_eq!(
+            test_cursor.into_inner(),
+            vec![0x00, 0x00, 0x00, 0x00, 0x08, 0x39, 0xF6, 0x40]
+        );
         let mut test_cursor2: Cursor<Vec<u8>> = Cursor::new(vec![0u8; 8]);
         test_cursor2.write_be_to_f64(91024.5f64).unwrap();
-        assert_eq!(test_cursor2.into_inner(), vec![0x40, 0xF6, 0x39, 0x08, 0x00, 0x00, 0x00, 0x00]);
+        assert_eq!(
+            test_cursor2.into_inner(),
+            vec![0x40, 0xF6, 0x39, 0x08, 0x00, 0x00, 0x00, 0x00]
+        );
+    }
+}
+#[cfg(test)]
+mod magic_number_tests {
+    use error::MagicNumberCheckError;
+    use std::io::Cursor;
+    use MagicNumberCheck;
+    #[test]
+    fn check_valid() {
+        let ref mut reader = Cursor::new(vec![b'T', b'E', b'S', b'T']);
+        reader
+            .check_magic_number(&[b'T', b'E', b'S', b'T'])
+            .unwrap();
+    }
+
+    #[test]
+    fn check_invalid() {
+        let ref mut reader = Cursor::new(vec![b'T', b'E', b'S', b'T']);
+        match reader.check_magic_number(&[b'N', b'E', b'S', b'T']) {
+            Ok(_) => panic!("Expected an error"),
+            Err(MagicNumberCheckError::MagicNumber(_)) => {}
+            Err(_) => panic!("Unexpected error"),
+        }
     }
 }
