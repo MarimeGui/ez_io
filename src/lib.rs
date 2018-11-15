@@ -150,6 +150,14 @@ pub trait ReadE: Read {
 
 impl<R: Read> ReadE for R {}
 
+macro_rules! write_auto {
+    ($endian:ident, $size:expr, $from:ty, $tw:expr, $self:expr) => {{
+        let temp = unsafe { transmute::<$from, [u8; $size]>($tw.$endian()) };
+        $self.write_all(&temp)?;
+        Ok(())
+    }};
+}
+
 pub trait WriteE: Write {
     // u8
     fn write_to_u8(&mut self, tw: u8) -> Result<()> {
@@ -159,73 +167,50 @@ pub trait WriteE: Write {
 
     // u16
     fn write_le_to_u16(&mut self, tw: u16) -> Result<()> {
-        let mut temp = unsafe { transmute::<u16, [u8; 2]>(tw) };
-        #[cfg(target_endian = "big")]
-        temp.reverse();
-        self.write_all(&temp)?;
-        Ok(())
+        write_auto!(to_le, 2, u16, tw, self)
     }
 
     fn write_be_to_u16(&mut self, tw: u16) -> Result<()> {
-        let mut temp = unsafe { transmute::<u16, [u8; 2]>(tw) };
-        #[cfg(target_endian = "little")]
-        temp.reverse();
-        self.write_all(&temp)?;
-        Ok(())
+        write_auto!(to_be, 2, u16, tw, self)
     }
 
     // u32
     fn write_le_to_u32(&mut self, tw: u32) -> Result<()> {
-        let mut temp = unsafe { transmute::<u32, [u8; 4]>(tw) };
-        #[cfg(target_endian = "big")]
-        temp.reverse();
-        self.write_all(&temp)?;
-        Ok(())
+        write_auto!(to_le, 4, u32, tw, self)
     }
 
     fn write_be_to_u32(&mut self, tw: u32) -> Result<()> {
-        let mut temp = unsafe { transmute::<u32, [u8; 4]>(tw) };
-        #[cfg(target_endian = "little")]
-        temp.reverse();
-        self.write_all(&temp)?;
-        Ok(())
+        write_auto!(to_be, 4, u32, tw, self)
     }
 
     // i8
     fn write_to_i8(&mut self, tw: i8) -> Result<()> {
-        let mut temp = unsafe { transmute::<i8, [u8; 1]>(tw) };
+        let temp = unsafe { transmute::<i8, [u8; 1]>(tw) };
         self.write_all(&temp)?;
         Ok(())
     }
 
     // i16
     fn write_le_to_i16(&mut self, tw: i16) -> Result<()> {
-        let mut temp = unsafe { transmute::<i16, [u8; 2]>(tw) };
-        #[cfg(target_endian = "big")]
-        temp.reverse();
-        self.write_all(&temp)?;
-        Ok(())
+        write_auto!(to_le, 2, i16, tw, self)
     }
 
     fn write_be_to_i16(&mut self, tw: i16) -> Result<()> {
-        let mut temp = unsafe { transmute::<i16, [u8; 2]>(tw) };
-        #[cfg(target_endian = "little")]
-        temp.reverse();
-        self.write_all(&temp)?;
-        Ok(())
+        write_auto!(to_be, 2, i16, tw, self)
     }
 
     // i32
     fn write_le_to_i32(&mut self, tw: i32) -> Result<()> {
-        let mut temp = unsafe { transmute::<i32, [u8; 4]>(tw) };
-        #[cfg(target_endian = "big")]
-        temp.reverse();
-        self.write_all(&temp)?;
-        Ok(())
+        write_auto!(to_le, 4, i32, tw, self)
+    }
+
+    fn write_be_to_i32(&mut self, tw: i32) -> Result<()> {
+        write_auto!(to_be, 4, i32, tw, self)
     }
 
     // f32
     fn write_le_to_f32(&mut self, tw: f32) -> Result<()> {
+        #[allow(unused_mut)]
         let mut temp = unsafe { transmute::<f32, [u8; 4]>(tw) };
         #[cfg(target_endian = "big")]
         temp.reverse();
@@ -234,6 +219,7 @@ pub trait WriteE: Write {
     }
 
     fn write_be_to_f32(&mut self, tw: f32) -> Result<()> {
+        #[allow(unused_mut)]
         let mut temp = unsafe { transmute::<f32, [u8; 4]>(tw) };
         #[cfg(target_endian = "little")]
         temp.reverse();
@@ -243,6 +229,7 @@ pub trait WriteE: Write {
 
     // f64
     fn write_le_to_f64(&mut self, tw: f64) -> Result<()> {
+        #[allow(unused_mut)]
         let mut temp = unsafe { transmute::<f64, [u8; 8]>(tw) };
         #[cfg(target_endian = "big")]
         temp.reverse();
@@ -251,15 +238,8 @@ pub trait WriteE: Write {
     }
 
     fn write_be_to_f64(&mut self, tw: f64) -> Result<()> {
+        #[allow(unused_mut)]
         let mut temp = unsafe { transmute::<f64, [u8; 8]>(tw) };
-        #[cfg(target_endian = "little")]
-        temp.reverse();
-        self.write_all(&temp)?;
-        Ok(())
-    }
-
-    fn write_be_to_i32(&mut self, tw: i32) -> Result<()> {
-        let mut temp = unsafe { transmute::<i32, [u8; 4]>(tw) };
         #[cfg(target_endian = "little")]
         temp.reverse();
         self.write_all(&temp)?;

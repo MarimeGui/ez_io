@@ -53,9 +53,9 @@ impl Error for WrongMagicNumber {
 impl fmt::Display for WrongMagicNumber {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let expected_string =
-            String::from_utf8(self.expected.clone()).unwrap_or(format!("{:X?}", self.expected));
+            String::from_utf8(self.expected.clone()).unwrap_or_else(|_| format!("{:X?}", self.expected));
         let read_string =
-            String::from_utf8(self.read.clone()).unwrap_or(format!("{:X?}", self.read));
+            String::from_utf8(self.read.clone()).unwrap_or_else(|_| format!("{:X?}", self.read));
         write!(
             f,
             "Incorrect Magic Number: Expected '{}', Read '{}'",
