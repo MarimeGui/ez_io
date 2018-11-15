@@ -1,6 +1,6 @@
 pub mod error;
 
-use error::{MagicNumberCheckError, WrongMagicNumber};
+use crate::error::{MagicNumberCheckError, WrongMagicNumber};
 use std::io::Read;
 use std::io::Result;
 use std::io::Write;
@@ -369,9 +369,9 @@ mod write_tests {
 }
 #[cfg(test)]
 mod magic_number_tests {
-    use error::MagicNumberCheckError;
+    use crate::error::MagicNumberCheckError;
     use std::io::Cursor;
-    use MagicNumberCheck;
+    use crate::MagicNumberCheck;
     #[test]
     fn check_valid() {
         let ref mut reader = Cursor::new(vec![b'T', b'E', b'S', b'T']);
