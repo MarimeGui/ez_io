@@ -1,7 +1,6 @@
 pub mod error;
 
 use error::{MagicNumberCheckError, WrongMagicNumber};
-use std::error::Error;
 use std::io::Read;
 use std::io::Result;
 use std::io::Write;
@@ -146,17 +145,6 @@ pub trait ReadE: Read {
         #[cfg(target_endian = "little")]
         temp.reverse();
         unsafe { Ok(transmute::<[u8; 8], f64>(temp)) }
-    }
-
-    fn read_to_string_n(&mut self, length: u32) -> STDResult<String, Box<Error>> {
-        let mut bytes = vec![0; length as usize];
-        self.read_exact(&mut bytes)?;
-        let out = String::from_utf8(bytes);
-        if out.is_err() {
-            Err(Box::new(out.unwrap_err()))
-        } else {
-            Ok(out.unwrap())
-        }
     }
 }
 
@@ -351,14 +339,6 @@ mod read_tests {
             Cursor::new([0x40, 0xF6, 0x39, 0x08, 0x00, 0x00, 0x00, 0x00])
                 .read_be_to_f64()
                 .unwrap()
-        );
-    }
-    #[test]
-    fn string_tests() {
-        let text_bytes = [72, 101, 108, 108, 111];
-        assert_eq!(
-            String::from("Hello"),
-            Cursor::new(text_bytes).read_to_string_n(5).unwrap()
         );
     }
 }
