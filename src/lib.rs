@@ -60,6 +60,22 @@ pub trait ReadE: Read {
         read_auto!(from_be, 4, u32, self)
     }
 
+    // u64
+    fn read_to_u64(&mut self, endian: Endian) -> Result<u64> {
+        match endian {
+            Endian::BigEndian => self.read_be_to_u64(),
+            Endian::LittleEndian => self.read_le_to_u64(),
+        }
+    }
+
+    fn read_le_to_u64(&mut self) -> Result<u64> {
+        read_auto!(from_le, 8, u64, self)
+    }
+
+    fn read_be_to_u64(&mut self) -> Result<u64> {
+        read_auto!(from_be, 8, u64, self)
+    }
+
     // i8
     fn read_to_i8(&mut self) -> Result<i8> {
         let mut temp: [u8; 1] = [0];
@@ -97,6 +113,22 @@ pub trait ReadE: Read {
 
     fn read_be_to_i32(&mut self) -> Result<i32> {
         read_auto!(from_be, 4, i32, self)
+    }
+
+    // i64
+    fn read_to_i64(&mut self, endian: Endian) -> Result<i64> {
+        match endian {
+            Endian::BigEndian => self.read_be_to_i64(),
+            Endian::LittleEndian => self.read_le_to_i64(),
+        }
+    }
+
+    fn read_le_to_i64(&mut self) -> Result<i64> {
+        read_auto!(from_le, 8, i64, self)
+    }
+
+    fn read_be_to_i64(&mut self) -> Result<i64> {
+        read_auto!(from_be, 8, i64, self)
     }
 
     // f32
@@ -183,6 +215,15 @@ pub trait WriteE: Write {
         write_auto!(to_be, 4, u32, tw, self)
     }
 
+    // u64
+    fn write_le_to_u64(&mut self, tw: u64) -> Result<()> {
+        write_auto!(to_le, 8, u64, tw, self)
+    }
+
+    fn write_be_to_u64(&mut self, tw: u64) -> Result<()> {
+        write_auto!(to_be, 8, u64, tw, self)
+    }
+
     // i8
     fn write_to_i8(&mut self, tw: i8) -> Result<()> {
         let temp = unsafe { transmute::<i8, [u8; 1]>(tw) };
@@ -206,6 +247,15 @@ pub trait WriteE: Write {
 
     fn write_be_to_i32(&mut self, tw: i32) -> Result<()> {
         write_auto!(to_be, 4, i32, tw, self)
+    }
+
+    // i64
+    fn write_le_to_i64(&mut self, tw: i64) -> Result<()> {
+        write_auto!(to_le, 8, i64, tw, self)
+    }
+
+    fn write_be_to_i64(&mut self, tw: i64) -> Result<()> {
+        write_auto!(to_be, 8, i64, tw, self)
     }
 
     // f32
@@ -289,6 +339,28 @@ mod read_tests {
         assert_eq!(
             987654321u32,
             Cursor::new([58, 222, 104, 177]).read_be_to_u32().unwrap()
+        );
+    }
+    #[test]
+    fn u64_tests() {
+        assert_eq!(
+            3458769049845106754u64,
+            Cursor::new([0x30, 0x00, 0x04, 0x20, 0x20, 0x22, 0x08, 0x42]).read_be_to_u64().unwrap()
+        );
+        assert_eq!(
+            3458769049845106754u64,
+            Cursor::new([0x42, 0x08, 0x22, 0x20, 0x20, 0x04, 0x00, 0x30]).read_le_to_u64().unwrap()
+        );
+    }
+    #[test]
+    fn i64_tests() {
+        assert_eq!(
+            -5764571161165805232i64,
+            Cursor::new([0xB0, 0x00, 0x21, 0x12, 0x28, 0x40, 0x49, 0x50]).read_be_to_i64().unwrap()
+        );
+        assert_eq!(
+            -5764571161165805232i64,
+            Cursor::new([0x50, 0x49, 0x40, 0x28, 0x12, 0x21, 0x00, 0xB0]).read_le_to_i64().unwrap()
         );
     }
     #[test]
